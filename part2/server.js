@@ -3,37 +3,47 @@ var fs = require('fs');
 var app = express();
 var port = process.env.PORT || 8000;
 
+
 app.post('/create/:name/:age', function(req, res) {
-  var obj = {
+
+  var newId = 0;
+  let data = fs.readFileSync("./storage.json", "utf8")
+    let newData = JSON.parse(data)
+
+
+  var newUser = [{
     name: req.params.name,
+    id: newData.length,
     age: parseInt(req.params.age)
-  }
-  fs.writeFileSync('./storage.json', JSON.stringify([]))
-  fs.readFile('./storage.json', 'utf8', function(err, data){
-    let arr = JSON.parse(data)
+  }]
 
-    arr.push(obj);
-
-    fs.writeFile('./storage.json', JSON.stringify(arr), function(err) {
-      res.sendStatus(200)
-    })
+  fs.readFile("./storage.json", "utf8", (err, data) => {
+    if (data.includes("[")) {
+      let newData = JSON.parse(data)
+      newData.push(newUser[0])
+      fs.writeFileSync('./storage.json', JSON.stringify(newData));
+    } else {
+      fs.writeFileSync('./storage.json', JSON.stringify(newUser))
+    }
   })
+  res.json(newUser)
+  res.json(newUser)
 });
 
 app.get('/', (req, res) => {
   res.send(json)
 })
 
-app.get('/:name', (req, res) => {
+app.get('/:id', (req, res) => {
   fs.readFile('./storage.json', 'utf8', (err, data) => {
     let pData = JSON.parse(data)
     let match = pData.filter((item) => {
-      return item.name == req.params.name;
+      return item.id == req.params.id;
     })
 
-    if(match.length >= 1){
+    if (match.length >= 1) {
       res.json(match[0])
-    }else{
+    } else {
       res.sendStatus(400)
     }
   });
